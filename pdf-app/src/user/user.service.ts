@@ -32,9 +32,11 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     }
-    fs.writeFile(`./example_from_db.pdf`, user.pdf, (err) => {
-      if (err) console.log(err);
-    });
+    if (user.pdf) {
+      fs.writeFile(`./example_from_db.pdf`, user.pdf, (err) => {
+        if (err) console.log(err);
+      });
+    }
     return user;
   }
 
