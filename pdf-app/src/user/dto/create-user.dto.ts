@@ -1,22 +1,29 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword, IsUUID } from 'class-validator';
 
 export class CreateUserDto {
+  @IsUUID('all', { each: true })
+  @IsOptional()
   id: string;
 
+  @IsNotEmpty({ message: 'email should be provided' })
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'password should be provided' })
+  @IsStrongPassword()
   password: string;
 
-  @IsNotEmpty()
+  @IsString({ message: 'bad request' })
   firstName: string;
 
-  @IsNotEmpty()
+  @IsString({ message: 'bad request' })
   lastName: string;
 
+  @IsString({ message: 'bad request' })
+  @IsOptional()
   image?: string;
 
+  @IsOptional()
   pdf?: Uint8Array;
 
   createdAt?: Date;

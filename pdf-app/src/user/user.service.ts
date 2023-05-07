@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as pdfKit from 'pdfkit';
 import * as fs from 'fs';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class UserService {
@@ -35,15 +36,14 @@ export class UserService {
       fs.writeFile(`./example_from_db.pdf`, user.pdf, (err) => {
         if (err) console.log(err);
       });
+      console.log('Pdf file loaded to the file example_from_db.pdf ');
     }
     return user;
   }
 
   public async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ email });
-    if (!user) {
-      throw new NotFoundException(`User ${email} not found`);
-    }
+
     return user;
   }
 
