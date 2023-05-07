@@ -1,15 +1,14 @@
-import { ForbiddenException, Injectable, NotFoundException, Options } from '@nestjs/common';
+import { catchError, firstValueFrom, map } from 'rxjs';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as pdfKit from 'pdfkit';
 import * as fs from 'fs';
-import { catchError, firstValueFrom, map } from 'rxjs';
-import { WritableStream } from 'stream/web';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -23,11 +22,11 @@ export class UserService {
     return await this.userRepository.save(createUserDto);
   }
 
-  public async findAll() {
+  public async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }
 
-  public async findOne(id: string) {
+  public async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
@@ -40,7 +39,7 @@ export class UserService {
     return user;
   }
 
-  public async findOneByEmail(email: string) {
+  public async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new NotFoundException(`User ${email} not found`);
@@ -57,11 +56,11 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  public async remove(id: string) {
+  public async remove(id: string): Promise<DeleteResult> {
     return await this.userRepository.delete({ id });
   }
 
-  public async getUserImage(url: string): Promise<void> {
+  public async saveUserImage(url: string): Promise<boolean> {
     const image = await firstValueFrom(
       this.httpService
         .get(url, { responseType: 'stream' })
@@ -78,9 +77,10 @@ export class UserService {
         ),
     );
     console.log('The image has been uploaded');
+    return true;
   }
 
-  public async createPdf(firstName: string, lastName: string, image: string) {
+  public async createPdf(firstName: string, lastName: string, image: string): Promise<boolean> {
     await this.sleep(1000);
     const pdfDoc = new pdfKit();
     let stream = fs.createWriteStream(this.configService.get('PDF_FILE'));
@@ -97,18 +97,19 @@ export class UserService {
 
     pdfDoc.end();
     console.log('PDF generate successfully');
-    return;
+    return true;
   }
 
-  public async savePdf(user: User) {
+  public async savePdf(user: User): Promise<boolean> {
     await this.sleep(1000);
     const pdfArrayBuffer = fs.readFileSync(this.configService.get('PDF_FILE'));
     user.pdf = pdfArrayBuffer;
     await this.userRepository.save(user);
     console.log('PDF saved successfully');
+    return true;
   }
 
-  private sleep(ms: number) {
+  private sleep(ms: number): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(resolve, ms);
     });

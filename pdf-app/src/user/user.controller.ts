@@ -1,12 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '../auth/auth.guard';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly authService: AuthService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   public async create(@Body() createUserDto: CreateUserDto) {
     try {
@@ -17,6 +32,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   public async findAll() {
     try {
@@ -27,6 +43,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   public async findOne(@Param('id') id: string) {
     try {
@@ -37,6 +54,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     try {
@@ -47,6 +65,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   public async remove(@Param('id') id: string) {
     try {
@@ -57,11 +76,12 @@ export class UserController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post('pdf')
   public async addPdfToUser(@Body() updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userService.findOneByEmail(updateUserDto.email);
-      await this.userService.getUserImage(user.image);
+      await this.userService.saveUserImage(user.image);
       await this.userService.createPdf(user.firstName, user.lastName, user.image);
       await this.userService.savePdf(user);
 
