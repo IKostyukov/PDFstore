@@ -1,34 +1,39 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword, IsUUID } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword, IsUUID } from 'class-validator';
+import { Role } from 'src/roles/role.enum';
 
 export class CreateUserDto {
   @IsUUID('all', { each: true })
   @IsOptional()
-  id: string;
+  public readonly id: string;
 
   @IsNotEmpty({ message: 'email should be provided' })
   @IsEmail()
-  email: string;
+  public readonly email: string;
 
   @IsNotEmpty({ message: 'password should be provided' })
   @IsStrongPassword()
-  password: string;
+  public password: string;
 
   @IsString({ message: 'bad request' })
-  firstName: string;
+  public readonly firstName: string;
 
   @IsString({ message: 'bad request' })
-  lastName: string;
+  public readonly lastName: string;
 
   @IsString({ message: 'bad request' })
   @IsOptional()
-  image?: string;
+  public readonly image?: string;
 
   @IsOptional()
-  pdf?: Uint8Array;
+  public readonly pdf?: Uint8Array;
 
-  createdAt?: Date;
+  @IsOptional()
+  @IsArray({ message: 'bad request' })
+  public roles: Role[];
 
-  updatedAt?: Date;
+  public createdAt?: Date;
 
-  deletedAt?: Date;
+  public updatedAt?: Date;
+
+  public deletedAt?: Date;
 }

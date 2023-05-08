@@ -7,9 +7,9 @@ import { DeleteResult, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { Role } from '../roles/role.enum';
 import * as pdfKit from 'pdfkit';
 import * as fs from 'fs';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class UserService {
@@ -19,18 +19,25 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  public async create(createUserDto: CreateUserDto): Promise<User> {
+  public async createUser(createUserDto: CreateUserDto): Promise<User> {
     return await this.userRepository.save(createUserDto);
   }
 
-  public async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+  public async findAllUsers(): Promise<User[]> {
+    return await this.userRepository.find({
+      select: ['id', 'firstName', 'lastName', 'email', 'image', 'pdf', 'roles', 'createdAt', 'updatedAt', 'deletedAt'],
+    });
   }
 
-  public async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ id });
+  public async isUsersExist(): Promise<boolean> {
+    const result = await this.userRepository.findAndCount();
+    return result[1] === 0 ? false : true;
+  }
+
+  public async findOneUser(userId: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
+      throw new NotFoundException(`User ${userId} not found`);
     }
     if (user.pdf) {
       fs.writeFile(`./example_from_db.pdf`, user.pdf, (err) => {
@@ -41,14 +48,14 @@ export class UserService {
     return user;
   }
 
-  public async findOneByEmail(email: string): Promise<User> {
+  public async findOneUserByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ email });
 
     return user;
   }
 
-  public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
+  public async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOneUser(userId);
     user.firstName = updateUserDto.firstName ?? updateUserDto.firstName;
     user.lastName = updateUserDto.lastName ?? updateUserDto.lastName;
     user.image = updateUserDto.image ?? updateUserDto.image;
@@ -56,8 +63,15 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  public async remove(id: string): Promise<DeleteResult> {
-    return await this.userRepository.delete({ id });
+  public async updateUserToAdmin(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOneUser(userId);
+    user.roles.push(Role.Admin);
+
+    return await this.userRepository.save(user);
+  }
+
+  public async removeUser(userId: string): Promise<DeleteResult> {
+    return await this.userRepository.delete({ id: userId });
   }
 
   public async saveUserImage(url: string): Promise<boolean> {

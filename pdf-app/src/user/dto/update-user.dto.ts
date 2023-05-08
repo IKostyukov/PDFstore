@@ -5,14 +5,14 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validat
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsNotEmpty({ message: 'first name should be provided' })
   @IsString({ message: 'bad request' })
-  firstName: string;
+  public firstName: string;
 
   @IsNotEmpty({ message: 'last name should be provided' })
   @IsString({ message: 'bad request' })
-  lastName: string;
+  public lastName: string;
 
   @IsNotEmpty({ message: 'image should be provided' })
   @IsString({ message: 'bad request' })
   @IsOptional()
-  image?: string;
+  public image?: string;
 }
