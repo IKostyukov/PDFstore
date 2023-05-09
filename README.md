@@ -17,7 +17,7 @@ POST api/user  -  create user
     "password": "12G3dg&&4"
     }
 
-POST api/auth/login - login with email and password 
+POST api/auth/login - login with email and password.  
  JWT token wil be returned
      
      Body:
@@ -46,7 +46,7 @@ POST api/user/:uuid - create PDF and add it to the user
        "email": "test@test.test"
     }
 
-PATCH api/user/admin/:uuid - set new user ADMIN role
+PATCH api/user/admin/:uuid - set ADMIN role to a new user 
 
 Access to Data Base in browser on localhost:5050 via PgAdmin
 
