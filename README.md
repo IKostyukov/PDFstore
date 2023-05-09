@@ -30,6 +30,8 @@ GET api/user/:uuid - retrieve single user
 
 GET api/user - retrieve all users for ADMIN role
 
+DELETE api/user/:uuid - remove user for ADMIN role
+
 PATCH api/user/:uuid - update user, eg. add image field
     
     Body:
